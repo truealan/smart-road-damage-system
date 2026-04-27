@@ -29,7 +29,7 @@
   /* Light Mode Backgrounds */
   --bg-primary: #f0f4ff;
   --bg-secondary: #ffffff;
-  --bg-card: rgba(255, 255, 255, 0.7);
+  --bg-card: rgba(255, 255, 255, 1);
   --bg-glass: rgba(255, 255, 255, 0.25);
   --bg-overlay: rgba(255, 255, 255, 0.15);
 
@@ -75,7 +75,7 @@
 [data-theme='dark'] {
   --bg-primary: #0b1120;
   --bg-secondary: #111827;
-  --bg-card: rgba(17, 24, 39, 0.8);
+  --bg-card: rgba(17, 24, 39, 1);
   --bg-glass: rgba(17, 24, 39, 0.4);
   --bg-overlay: rgba(255, 255, 255, 0.05);
 
