@@ -4,22 +4,28 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { reportsAPI } from '../../services/api';
+import { reportsAPI, authAPI } from '../../services/api';
 import { uploadImage } from '../../services/storage';
 import { getCurrentLocation } from '../../utils/helpers';
 import LocationPicker from '../map/LocationPicker';
 
 const DAMAGE_TYPES = [
-  { value: 'pothole',  label: '🕳️ Pothole' },
-  { value: 'crack',    label: '〰️ Road Crack' },
+  { value: 'pothole', label: '🕳️ Pothole' },
+  { value: 'crack', label: '〰️ Road Crack' },
   { value: 'flooding', label: '🌊 Flooding' },
   { value: 'collapse', label: '⚠️ Road Collapse' },
-  { value: 'other',    label: '🔧 Other' },
+  { value: 'other', label: '🔧 Other' },
 ];
-
+const user = await authAPI.getMe();
+let reporterName, reporterEmail
+if (user && user.success) {
+  reporterName = user.data.user.name
+  reporterEmail = user.data.user.email
+}
+console.log(reporterEmail, reporterName)
 const initialForm = {
-  reporter_name: '',
-  reporter_email: '',
+  reporter_name: reporterName,
+  reporter_email: reporterEmail,
   reporter_phone: '',
   damage_type: '',
   description: '',
@@ -127,6 +133,7 @@ const ReportForm = () => {
               placeholder="Your name"
               value={form.reporter_name}
               onChange={(e) => set('reporter_name', e.target.value)}
+              disabled={!(!reporterName)}
             />
             {errors.reporter_name && <span className="form-error">{errors.reporter_name}</span>}
           </div>
@@ -138,6 +145,7 @@ const ReportForm = () => {
               placeholder="you@email.com"
               value={form.reporter_email}
               onChange={(e) => set('reporter_email', e.target.value)}
+              disabled={!(!reporterName)}
             />
             {errors.reporter_email && <span className="form-error">{errors.reporter_email}</span>}
           </div>

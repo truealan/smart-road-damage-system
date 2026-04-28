@@ -38,7 +38,7 @@ const Navbar = () => {
           <Link to="/map" className={`nav-link ${isActive('/map') ? 'active' : ''}`}>Map View</Link>
           {user && (
             <Link to="/dashboard" className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}>
-              My Reports
+              Reports
             </Link>
           )}
           {isAdmin && (
@@ -71,7 +71,7 @@ const Navbar = () => {
                   </div>
                   <hr />
                   <button className="dropdown-item" onClick={() => { navigate('/dashboard'); setMenuOpen(false); }}>
-                    📋 My Reports
+                    📋 Reports
                   </button>
                   {isAdmin && (
                     <button className="dropdown-item" onClick={() => { navigate('/admin'); setMenuOpen(false); }}>
@@ -107,7 +107,7 @@ const Navbar = () => {
           <Link to="/report" className="mobile-link" onClick={() => setMenuOpen(false)}>📍 Report Damage</Link>
           <Link to="/map" className="mobile-link" onClick={() => setMenuOpen(false)}>🗺️ Map View</Link>
           {user && (
-            <Link to="/dashboard" className="mobile-link" onClick={() => setMenuOpen(false)}>📋 My Reports</Link>
+            <Link to="/dashboard" className="mobile-link" onClick={() => setMenuOpen(false)}>📋 Reports</Link>
           )}
           {isAdmin && (
             <Link to="/admin" className="mobile-link" onClick={() => setMenuOpen(false)}>⚙️ Admin Panel</Link>

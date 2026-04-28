@@ -10,12 +10,12 @@ import StatusBadge from '../../components/ui/StatusBadge';
 import { formatDateTime, damageEmoji, capitalize } from '../../utils/helpers';
 
 const STATUS_OPTIONS = ['', 'pending', 'in_progress', 'resolved', 'rejected'];
-const TYPE_OPTIONS   = ['', 'pothole', 'crack', 'flooding', 'collapse', 'other'];
+const TYPE_OPTIONS = ['', 'pothole', 'crack', 'flooding', 'collapse', 'other'];
 
 const UserDashboard = () => {
-  const [search, setSearch]     = useState('');
-  const [statusF, setStatusF]   = useState('');
-  const [typeF, setTypeF]       = useState('');
+  const [search, setSearch] = useState('');
+  const [statusF, setStatusF] = useState('');
+  const [typeF, setTypeF] = useState('');
   const [selected, setSelected] = useState(null);
 
   const debouncedSearch = useDebounce(search, 400);
@@ -36,7 +36,7 @@ const UserDashboard = () => {
       <div className="container">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div className="page-header" style={{ margin: 0 }}>
-            <h1 className="page-title">📋 My Reports</h1>
+            <h1 className="page-title">📋 Reports</h1>
             <p className="page-subtitle">Track the status of your submitted reports.</p>
           </div>
           <Link to="/report" className="btn btn-accent">
