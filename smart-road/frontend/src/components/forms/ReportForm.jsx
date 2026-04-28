@@ -39,15 +39,14 @@ const ReportForm = () => {
 
   const fileRef = useRef(null);
   const navigate = useNavigate();
-
+  let loggedInUser
   useEffect(() => {
     async function loadUser() {
       try {
         const user = await authAPI.getMe();
-        console.log(user);
 
         if (user?.success && user?.data?.user) {
-          const loggedInUser = user.data.user;
+          loggedInUser = user.data.user;
 
           setForm((f) => ({
             ...f,
@@ -169,7 +168,7 @@ const ReportForm = () => {
               placeholder="Your name"
               value={form.reporter_name}
               onChange={(e) => set('reporter_name', e.target.value)}
-              disabled={!!form.reporter_name}
+              disabled={!!loggedInUser}
             />
             {errors.reporter_name && <span className="form-error">{errors.reporter_name}</span>}
           </div>
@@ -181,7 +180,7 @@ const ReportForm = () => {
               placeholder="you@email.com"
               value={form.reporter_email}
               onChange={(e) => set('reporter_email', e.target.value)}
-              disabled={!!form.reporter_email}
+              disabled={!!loggedInUser}
             />
             {errors.reporter_email && <span className="form-error">{errors.reporter_email}</span>}
           </div>
