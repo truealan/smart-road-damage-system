@@ -1,7 +1,7 @@
 // frontend/src/components/forms/ReportForm.jsx
 // Full featured damage report submission form
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { reportsAPI, authAPI } from '../../services/api';
@@ -16,16 +16,10 @@ const DAMAGE_TYPES = [
   { value: 'collapse', label: '⚠️ Road Collapse' },
   { value: 'other', label: '🔧 Other' },
 ];
-const user = await authAPI.getMe();
-let reporterName, reporterEmail
-if (user && user.success) {
-  reporterName = user.data.user.name
-  reporterEmail = user.data.user.email
-}
-console.log(reporterEmail, reporterName)
+
 const initialForm = {
-  reporter_name: reporterName,
-  reporter_email: reporterEmail,
+  reporter_name: '',
+  reporter_email: '',
   reporter_phone: '',
   damage_type: '',
   description: '',
@@ -42,30 +36,74 @@ const ReportForm = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [locating, setLocating] = useState(false);
+  const [loadingUser, setLoadingUser] = useState(true);
+
   const fileRef = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const user = await authAPI.getMe();
+        console.log(user);
+
+        if (user?.success && user?.data?.user) {
+          const loggedInUser = user.data.user;
+
+          setForm((f) => ({
+            ...f,
+            reporter_name:
+              loggedInUser.reporterName ||
+              loggedInUser.name ||
+              loggedInUser.full_name ||
+              '',
+            reporter_email:
+              loggedInUser.reporterEmail ||
+              loggedInUser.email ||
+              '',
+          }));
+        }
+      } catch (err) {
+        console.error('Failed to load user:', err);
+      } finally {
+        setLoadingUser(false);
+      }
+    }
+
+    loadUser();
+  }, []);
 
   const set = (field, value) => {
     setForm((f) => ({ ...f, [field]: value }));
     setErrors((e) => ({ ...e, [field]: '' }));
   };
 
-  // Client-side validation
   const validate = () => {
     const newErrors = {};
-    if (!form.reporter_name.trim()) newErrors.reporter_name = 'Your name is required';
-    if (!form.reporter_email.trim() || !/\S+@\S+\.\S+/.test(form.reporter_email))
+
+    if (!form.reporter_name.trim()) {
+      newErrors.reporter_name = 'Your name is required';
+    }
+
+    if (!form.reporter_email.trim() || !/\S+@\S+\.\S+/.test(form.reporter_email)) {
       newErrors.reporter_email = 'Valid email required';
-    if (!form.damage_type) newErrors.damage_type = 'Damage type required';
-    if (!form.description.trim() || form.description.length < 10)
+    }
+
+    if (!form.damage_type) {
+      newErrors.damage_type = 'Damage type required';
+    }
+
+    if (!form.description.trim() || form.description.length < 10) {
       newErrors.description = 'Description must be at least 10 characters';
-    if (!form.latitude || !form.longitude)
+    }
+
+    if (!form.latitude || !form.longitude) {
       newErrors.location = 'Please select a location on the map or use GPS';
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle image selection and preview
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -77,7 +115,6 @@ const ReportForm = () => {
     setImagePreview(URL.createObjectURL(file));
   };
 
-  // Auto-detect GPS location
   const handleGeolocate = async () => {
     setLocating(true);
     try {
@@ -100,7 +137,6 @@ const ReportForm = () => {
     try {
       let imageUrl = '';
 
-      // Upload image to Supabase Storage if selected
       if (imageFile) {
         toast.loading('Uploading image...', { id: 'img-upload' });
         imageUrl = await uploadImage(imageFile);
@@ -116,6 +152,16 @@ const ReportForm = () => {
       setSubmitting(false);
     }
   };
+
+  if (loadingUser) {
+    return (
+      <div className="glass-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
+        Loading user details...
+      </div>
+    );
+  }
+
+  const hasUserDetails = !!form.reporter_name || !!form.reporter_email;
 
   return (
     <form onSubmit={handleSubmit} noValidate>
@@ -133,7 +179,7 @@ const ReportForm = () => {
               placeholder="Your name"
               value={form.reporter_name}
               onChange={(e) => set('reporter_name', e.target.value)}
-              disabled={!(!reporterName)}
+              disabled={!!form.reporter_name}
             />
             {errors.reporter_name && <span className="form-error">{errors.reporter_name}</span>}
           </div>
@@ -145,7 +191,7 @@ const ReportForm = () => {
               placeholder="you@email.com"
               value={form.reporter_email}
               onChange={(e) => set('reporter_email', e.target.value)}
-              disabled={!(!reporterName)}
+              disabled={!!form.reporter_email}
             />
             {errors.reporter_email && <span className="form-error">{errors.reporter_email}</span>}
           </div>
@@ -176,7 +222,9 @@ const ReportForm = () => {
           >
             <option value="">Select damage type...</option>
             {DAMAGE_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>{t.label}</option>
+              <option key={t.value} value={t.value}>
+                {t.label}
+              </option>
             ))}
           </select>
           {errors.damage_type && <span className="form-error">{errors.damage_type}</span>}
@@ -211,13 +259,22 @@ const ReportForm = () => {
               <img
                 src={imagePreview}
                 alt="Preview"
-                style={{ width: '100%', maxHeight: '220px', objectFit: 'cover', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}
+                style={{
+                  width: '100%',
+                  maxHeight: '220px',
+                  objectFit: 'cover',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border)',
+                }}
               />
               <button
                 type="button"
                 className="btn btn-danger btn-sm"
                 style={{ position: 'absolute', top: 8, right: 8 }}
-                onClick={() => { setImageFile(null); setImagePreview(null); }}
+                onClick={() => {
+                  setImageFile(null);
+                  setImagePreview(null);
+                }}
               >
                 ✕ Remove
               </button>
@@ -226,7 +283,13 @@ const ReportForm = () => {
             <button
               type="button"
               className="btn btn-ghost"
-              style={{ width: '100%', justifyContent: 'center', padding: '1.5rem', border: '2px dashed var(--border)', borderRadius: 'var(--radius-md)' }}
+              style={{
+                width: '100%',
+                justifyContent: 'center',
+                padding: '1.5rem',
+                border: '2px dashed var(--border)',
+                borderRadius: 'var(--radius-md)',
+              }}
               onClick={() => fileRef.current.click()}
             >
               📷 Click to upload image (max 5MB)
