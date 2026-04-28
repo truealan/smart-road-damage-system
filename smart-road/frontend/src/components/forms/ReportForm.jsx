@@ -36,7 +36,6 @@ const ReportForm = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [locating, setLocating] = useState(false);
-  const [loadingUser, setLoadingUser] = useState(true);
 
   const fileRef = useRef(null);
   const navigate = useNavigate();
@@ -65,8 +64,6 @@ const ReportForm = () => {
         }
       } catch (err) {
         console.error('Failed to load user:', err);
-      } finally {
-        setLoadingUser(false);
       }
     }
 
@@ -153,13 +150,6 @@ const ReportForm = () => {
     }
   };
 
-  if (loadingUser) {
-    return (
-      <div className="glass-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
-        Loading user details...
-      </div>
-    );
-  }
 
   const hasUserDetails = !!form.reporter_name || !!form.reporter_email;
 
